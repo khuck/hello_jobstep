@@ -10,7 +10,7 @@ MCA="-mca btl_base_warn_component_unused 0"
 
 doit() {
     export OMP_PROC_BIND=spread
-    export OMP_DISPLAY_ENV=1
+    #export OMP_DISPLAY_ENV=1
     set -x
     export OMP_NUM_THREADS=${THREADS}
     mpirun -n ${PROCS} ${BIND} ${MCA} ${REPORT} ./hello_jobstep | grep -e "MPI 000" -e "OMP_"
@@ -35,7 +35,7 @@ nohyper() {
     let THREADS=${CORES}
     BIND="--bind-to core --cpus-per-proc ${THREADS}"
     #BIND="--bind-to core --map-by core"
-    export OMP_PLACES=core
+    export OMP_PLACES=cores
     echo "No Hyperthreading"
     doit
 }
