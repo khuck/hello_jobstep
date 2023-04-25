@@ -4,6 +4,11 @@
 Written by Tom Papatheodore
 **********************************************************/
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE             /* See feature_test_macros(7) */
+#endif
+#include <sched.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
@@ -11,7 +16,6 @@ Written by Tom Papatheodore
 #include <iomanip>
 #include <string.h>
 #include <mpi.h>
-#include <sched.h>
 #include <omp.h>
 #include <hip/hip_runtime.h>
 
@@ -55,6 +59,7 @@ int main(int argc, char *argv[]){
 
 	int hwthread;
 	int thread_id = 0;
+    int ncpus = std::thread::hardware_concurrency();
 
 	if(num_devices == 0){
 		#pragma omp parallel default(shared) private(hwthread, thread_id)
@@ -95,13 +100,40 @@ int main(int argc, char *argv[]){
 
 		#pragma omp parallel default(shared) private(hwthread, thread_id)
 		{
-            #pragma omp critical
+            auto nthreads = omp_get_num_threads();
+            //#pragma omp critical
+            #pragma omp for ordered
+            for (int i = 0 ; i < nthreads ; i++)
             {
-			thread_id = omp_get_thread_num();
-			hwthread = sched_getcpu();
+                #pragma omp ordered
+                {
+			    thread_id = omp_get_thread_num();
+			    hwthread = sched_getcpu();
+            /*
+                cpu_set_t *mask;
+                mask = CPU_ALLOC(ncpus);
+                CPU_ZERO(mask);
+                auto msize = CPU_ALLOC_SIZE(ncpus);
+                int retval = sched_getaffinity(0, msize, mask);
+                auto nhwthr = CPU_COUNT_S(msize, mask);
+                CPU_FREE(mask);
+                */
+                cpu_set_t mask;
+                CPU_ZERO(&mask);
+                auto msize = sizeof(mask);
+                sched_getaffinity(0, msize, &mask);
+                int nhwthr = CPU_COUNT(&mask);
+                std::string tmpstr;
+                for (int i = 0; i < ncpus ; i++) {
+                    // which hwthreads are in the set?
+                    if (CPU_ISSET(i, &mask)) {
+                        tmpstr = tmpstr + std::to_string(i) + ",";
+                    }
+                }
 
-            printf("MPI %03d - OMP %03d - HWT %03d - Node %s - RT_GPU_ID %s - GPU_ID %s - Bus_ID %s\n",
-                    rank, thread_id, hwthread, name, rt_gpu_id_list.c_str(), gpu_id_list, busid_list.c_str());
+                printf("MPI %03d - OMP %03d - HWT %03d - #HWT %03d - Set %s - Node %s - RT_GPU_ID %s - GPU_ID %s - Bus_ID %s\n",
+                    rank, thread_id, hwthread, nhwthr, tmpstr.c_str(), name, rt_gpu_id_list.c_str(), gpu_id_list, busid_list.c_str());
+                }
            }
 		}
 	}
