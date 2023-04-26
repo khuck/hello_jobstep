@@ -7,6 +7,7 @@ Written by Tom Papatheodore
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
 #endif
+#define _XOPEN_SOURCE 700
 #include <sched.h>
 
 #include <stdlib.h>
@@ -18,6 +19,12 @@ Written by Tom Papatheodore
 #include <mpi.h>
 #include <omp.h>
 #include <hip/hip_runtime.h>
+
+#include <sys/types.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+#define gettid() syscall(SYS_gettid)
 
 // Macro for checking errors in GPU API calls
 #define gpuErrorCheck(call)                                                                  \
@@ -130,12 +137,27 @@ int main(int argc, char *argv[]){
                         tmpstr = tmpstr + std::to_string(i) + ",";
                     }
                 }
+                auto lwp = gettid();
 
-                printf("MPI %03d - OMP %03d - HWT %03d - #HWT %03d - Set %s - Node %s - RT_GPU_ID %s - GPU_ID %s - Bus_ID %s\n",
-                    rank, thread_id, hwthread, nhwthr, tmpstr.c_str(), name, rt_gpu_id_list.c_str(), gpu_id_list, busid_list.c_str());
+                printf("MPI %03d - OMP %03d - HWT %03d - LWP %06ld - #HWT %03d - Set %s - Node %s - RT_GPU_ID %s - GPU_ID %s - Bus_ID %s\n",
+                    rank, thread_id, hwthread, lwp, nhwthr, tmpstr.c_str(), name, rt_gpu_id_list.c_str(), gpu_id_list, busid_list.c_str());
                 }
            }
 		}
+
+        std::string tmpstr;
+        DIR *dp;
+        struct dirent *ep;
+        dp = opendir ("/proc/self/task");
+        if (dp != NULL)
+        {
+            while ((ep = readdir (dp)) != NULL) {
+                if (strncmp(ep->d_name, ".", 1) == 0) continue;
+                tmpstr = tmpstr + ep->d_name + ", ";
+            }
+            (void) closedir (dp);
+        }
+        printf("MPI %03d - LWP - %s\n", rank, tmpstr.c_str());
 	}
 
 	MPI_Finalize();

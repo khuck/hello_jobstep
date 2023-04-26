@@ -6,7 +6,7 @@ export CUDA_VISIBLE_DEVICES=0
 let PROCS=16
 let CORES=48/${PROCS}
 #let PROCS=1
-REPORT="--report-bindings"
+#REPORT="--report-bindings"
 MCA="-mca btl_base_warn_component_unused 0"
 
 doit() {
@@ -14,7 +14,7 @@ doit() {
     #export OMP_DISPLAY_ENV=1
     set -x
     export OMP_NUM_THREADS=${THREADS}
-    mpirun -n ${PROCS} ${BIND} ${MCA} ${REPORT} ./hello_jobstep | sort
+    mpirun -n ${PROCS} ${BIND} ${MCA} ${REPORT} ./hello_jobstep | sort -n
     set +x
 }
 
