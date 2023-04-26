@@ -13,6 +13,7 @@ Written by Tom Papatheodore
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <set>
 #include <iomanip>
 #include <iomanip>
 #include <string.h>
@@ -104,6 +105,7 @@ int main(int argc, char *argv[]){
             busid_list.append(temp_busid);
 
 		}
+        std::set<long> tids;
 
 		#pragma omp parallel default(shared) private(hwthread, thread_id)
 		{
@@ -138,6 +140,7 @@ int main(int argc, char *argv[]){
                     }
                 }
                 auto lwp = gettid();
+                tids.insert(lwp);
 
                 printf("MPI %03d - OMP %03d - HWT %03d - LWP %06ld - #HWT %03d - Set %s - Node %s - RT_GPU_ID %s - GPU_ID %s - Bus_ID %s\n",
                     rank, thread_id, hwthread, lwp, nhwthr, tmpstr.c_str(), name, rt_gpu_id_list.c_str(), gpu_id_list, busid_list.c_str());
@@ -154,6 +157,23 @@ int main(int argc, char *argv[]){
             while ((ep = readdir (dp)) != NULL) {
                 if (strncmp(ep->d_name, ".", 1) == 0) continue;
                 tmpstr = tmpstr + ep->d_name + ", ";
+                long lwp = atol(ep->d_name);
+                if (!tids.count(lwp)) {
+                    cpu_set_t mask;
+                    CPU_ZERO(&mask);
+                    auto msize = sizeof(mask);
+                    sched_getaffinity(lwp, msize, &mask);
+                    int nhwthr = CPU_COUNT(&mask);
+                    std::string tmpstr2;
+                    for (int i = 0; i < ncpus ; i++) {
+                        // which hwthreads are in the set?
+                        if (CPU_ISSET(i, &mask)) {
+                            tmpstr2 = tmpstr2 + std::to_string(i) + ",";
+                        }
+                    }
+                    printf("MPI %03d - LWP %06ld - #HWT %03d - Set %s \n",
+                        rank, lwp, nhwthr, tmpstr2.c_str());
+                }
             }
             (void) closedir (dp);
         }
