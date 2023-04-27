@@ -41,7 +41,7 @@ int getgpu(const int rank, const int section, const char * name) {
     const char* gpu_id_list;
 
     // If HIP_VISIBLE_DEVICES is set, capture visible GPUs
-    const char* gpu_visible_devices = getenv("HIP_VISIBLE_DEVICES");
+    const char* gpu_visible_devices = getenv("ROCR_VISIBLE_DEVICES");
     if(gpu_visible_devices == NULL){
        	gpu_id_list = "N/A";
     }
