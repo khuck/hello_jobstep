@@ -1,8 +1,8 @@
-CXX      = mpicxx
+CXX      = hipcc
 CFLAGS   = -g -fopenmp -std=c++11
 LDFLAGS   = -g -fopenmp -std=c++11
-INCLUDES  = -pthread
-LIBRARIES = -pthread -L/opt/rocm-5.2.0/lib -lamdhip64 -L/opt/cray/pe/mpich/8.1.23/gtl/lib -lmpi_gtl_hsa
+INCLUDES  = -I/usr/local/packages/openmpi/4.1.1-rocm5.2.0/include -pthread
+LIBRARIES = -pthread -Wl,-rpath -Wl,/usr/local/packages/openmpi/4.1.1-rocm5.2.0/lib -Wl,--enable-new-dtags -L/usr/local/packages/openmpi/4.1.1-rocm5.2.0/lib -lmpi_cxx -lmpi
 
 hello_jobstep: hello_jobstep.o hello_openmp.o hello_hip.o hello_pthreads.o
 	${CXX} ${LDFLAGS} hello_jobstep.o hello_hip.o hello_openmp.o hello_pthreads.o -o hello_jobstep ${LIBRARIES}

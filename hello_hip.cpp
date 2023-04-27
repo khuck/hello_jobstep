@@ -76,9 +76,9 @@ int getgpu(const int rank, const int section, const char * name) {
 //            busid_list.append(temp_busid.substr(8,2));
             busid_list.append(temp_busid);
 
+            printf("MPI %03d - SEC %d - Node %s - RT_GPU_ID %s - GPU_ID %s - Bus_ID %s\n",
+                rank, section, name, rt_gpu_id_list.c_str(), gpu_id_list, busid_list.c_str());
 		}
-        printf("MPI %03d - SEC %d - Node %s - RT_GPU_ID %s - GPU_ID %s - Bus_ID %s\n",
-            rank, section, name, rt_gpu_id_list.c_str(), gpu_id_list, busid_list.c_str());
 	}
 	return 0;
 }
