@@ -37,10 +37,10 @@ do{                                                                             
     }                                                                                        \
 }while(0)
 
-int getgpu(const char * gpu_id_list, std::string& busid_list) {
+int getgpu(const int rank, const int section, const char * name) {
+    const char* gpu_id_list;
 
     // If HIP_VISIBLE_DEVICES is set, capture visible GPUs
-    //const char* gpu_id_list;
     const char* gpu_visible_devices = getenv("HIP_VISIBLE_DEVICES");
     if(gpu_visible_devices == NULL){
        	gpu_id_list = "N/A";
@@ -53,13 +53,9 @@ int getgpu(const char * gpu_id_list, std::string& busid_list) {
 	int num_devices = 0;
     gpuErrorCheck( hipGetDeviceCount(&num_devices) );
 
-	int hwthread;
-	int thread_id = 0;
-    int ncpus = std::thread::hardware_concurrency();
-
 	if(num_devices > 0){
 		char busid[64];
-        //std::string busid_list = "";
+        std::string busid_list = "";
         std::string rt_gpu_id_list = "";
 
 		// Loop over the GPUs available to each MPI rank
@@ -81,6 +77,8 @@ int getgpu(const char * gpu_id_list, std::string& busid_list) {
             busid_list.append(temp_busid);
 
 		}
+        printf("MPI %03d - SEC %d - Node %s - RT_GPU_ID %s - GPU_ID %s - Bus_ID %s\n",
+            rank, section, name, rt_gpu_id_list.c_str(), gpu_id_list, busid_list.c_str());
 	}
 	return 0;
 }
