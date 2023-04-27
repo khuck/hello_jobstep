@@ -1,0 +1,14 @@
+Things to check:
+    - Get assigned hardware
+        - process binding
+        - gpu binding
+        - openmp thread binding
+    - Get thread counts
+        - other threads
+    - Get utilization
+        - per bound set of resources
+    - Get contention (nonvoluntary_ctx_switch)
+        - for whole process
+        - can get per thread?
+    - Memory usage
+        - % of total
