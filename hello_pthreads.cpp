@@ -18,9 +18,6 @@
 #include <iomanip>
 #include <string.h>
 #include <mpi.h>
-#include <omp.h>
-#include <hip/hip_runtime.h>
-
 #include <sys/types.h>
 #include <dirent.h>
 #include <unistd.h>
