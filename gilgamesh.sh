@@ -15,7 +15,10 @@ doit() {
     #export OMP_DISPLAY_ENV=1
     set -x
     export OMP_NUM_THREADS=${THREADS}
-    mpirun -n ${PROCS} ${BIND} ${MCA} ${REPORT} ./hello_jobstep | sort -n
+    mpirun -n ${PROCS} ${BIND} ${MCA} ${REPORT} \
+    /mnt/beegfs/users/khuck/src/apex/install_gilgamesh_5.2.0/bin/apex_exec \
+    --apex:pthread --apex:mpi --apex:ompt --apex:status --apex:monitor_cpu \
+    ./hello_jobstep
     set +x
 }
 

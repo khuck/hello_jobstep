@@ -1,5 +1,5 @@
 # Change this to the appropriate platform
-include configs/config-hip.mk
+include configs/config-cuda.mk
 
 # No need to change below this...
 
@@ -14,6 +14,9 @@ obj/hello_nogpu.o: src/hello_nogpu.cpp
 
 obj/hello_hip.o: src/hello_hip.cpp
 	${CXX} ${CFLAGS} ${INCLUDES} -c src/hello_hip.cpp -o obj/hello_hip.o
+
+obj/hello_cuda.o: src/hello_cuda.cu
+	${CXX} ${CFLAGS} ${INCLUDES} -c src/hello_cuda.cu -o obj/hello_cuda.o
 
 obj/hello_openmp.o: src/hello_openmp.cpp
 	${CXX} ${CFLAGS} ${INCLUDES} -c src/hello_openmp.cpp -o obj/hello_openmp.o

@@ -1,3 +1,4 @@
+
 CXX      = hipcc
 CFLAGS   = -g -fopenmp -std=c++11
 LDFLAGS   = -g -fopenmp -std=c++11

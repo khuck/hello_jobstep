@@ -24,22 +24,10 @@ do{                                                                             
     }                                                                                        \
 }while(0)
 
-int main(int argc, char *argv[]){
-
-	MPI_Init(&argc, &argv);
-
-	int size;
-	MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-	int rank;
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-	char name[MPI_MAX_PROCESSOR_NAME];
-	int resultlength;
-	MPI_Get_processor_name(name, &resultlength);
+int getgpu(const int rank, const int section, const char * name) {
+    const char* gpu_id_list;
 
     // If CUDA_VISIBLE_DEVICES is set, capture visible GPUs
-    const char* gpu_id_list; 
     const char* gpu_visible_devices = getenv("CUDA_VISIBLE_DEVICES");
     if(gpu_visible_devices == NULL){
        	gpu_id_list = "N/A";
@@ -52,23 +40,8 @@ int main(int argc, char *argv[]){
 	int num_devices = 0;
     gpuErrorCheck( cudaGetDeviceCount(&num_devices) );
 
-	int hwthread;
-	int thread_id = 0;
-
-	if(num_devices == 0){
-		#pragma omp parallel default(shared) private(hwthread, thread_id)
-		{
-			thread_id = omp_get_thread_num();
-			hwthread = sched_getcpu();
-
-            printf("MPI %03d - OMP %03d - HWT %03d - Node %s\n", 
-                    rank, thread_id, hwthread, name);
-		}
-	}
-	else{
-
+	if (num_devices > 0){
 		char busid[64];
-
         std::string busid_list = "";
         std::string rt_gpu_id_list = "";
 
@@ -90,22 +63,9 @@ int main(int argc, char *argv[]){
 //            busid_list.append(temp_busid.substr(8,2));
             busid_list.append(temp_busid);
 
-		}
-
-		#pragma omp parallel default(shared) private(hwthread, thread_id)
-		{
-            #pragma omp critical
-            {
-			thread_id = omp_get_thread_num();
-			hwthread = sched_getcpu();
-
-            printf("MPI %03d - OMP %03d - HWT %03d - Node %s - RT_GPU_ID %s - GPU_ID %s - Bus_ID %s\n",
-                    rank, thread_id, hwthread, name, rt_gpu_id_list.c_str(), gpu_id_list, busid_list.c_str());
-           }
+            printf("MPI %03d - SEC %d - Node %s - RT_GPU_ID %s - GPU_ID %s - Bus_ID %s\n",
+                rank, section, name, rt_gpu_id_list.c_str(), gpu_id_list, busid_list.c_str());
 		}
 	}
-
-	MPI_Finalize();
-
 	return 0;
 }
