@@ -14,7 +14,6 @@
 #include <string.h>
 #include <mpi.h>
 #include <omp.h>
-#include <hip/hip_runtime.h>
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -47,7 +46,8 @@ int getopenmp(const int rank, const int section, const int ncpus, std::set<long>
                 for (int i = 0; i < ncpus ; i++) {
                     // which hwthreads are in the set?
                     if (CPU_ISSET(i, &mask)) {
-                        tmpstr = tmpstr + std::to_string(i) + ",";
+                        if (tmpstr.size() > 0) { tmpstr = tmpstr + ","; }
+                        tmpstr = tmpstr + std::to_string(i);
                     }
                 }
                 auto lwp = gettid();

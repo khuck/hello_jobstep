@@ -4,8 +4,8 @@ export NVHPC_CUDA_HOME=/packages/nvhpc/22.11_cuda11.8/Linux_x86_64/22.11/cuda/11
 export CUDA_VISIBLE_DEVICES=0
 export ROCR_VISIBLE_DEVICES=0,1
 
-let PROCS=16
-let CORES=48/${PROCS}
+let PROCS=2
+let CORES=4/${PROCS}
 #let PROCS=1
 #REPORT="--report-bindings"
 MCA="-mca btl_base_warn_component_unused 0"

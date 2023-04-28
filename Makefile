@@ -1,28 +1,30 @@
-CXX      = hipcc
-CFLAGS   = -g -fopenmp -std=c++11
-LDFLAGS   = -g -fopenmp -std=c++11
-INCLUDES  = -I/usr/local/packages/openmpi/4.1.1-rocm5.2.0/include -pthread
-LIBRARIES = -pthread -Wl,-rpath -Wl,/usr/local/packages/openmpi/4.1.1-rocm5.2.0/lib -Wl,--enable-new-dtags -L/usr/local/packages/openmpi/4.1.1-rocm5.2.0/lib -lmpi_cxx -lmpi
+# Change this to the appropriate platform
+include configs/config-hip.mk
 
-hello_jobstep: hello_jobstep.o hello_openmp.o hello_hip.o hello_pthreads.o
-	${CXX} ${LDFLAGS} hello_jobstep.o hello_hip.o hello_openmp.o hello_pthreads.o -o hello_jobstep ${LIBRARIES}
+# No need to change below this...
 
-hello_jobstep.o: hello_jobstep.cpp
-	${CXX} ${CFLAGS} ${INCLUDES} -c hello_jobstep.cpp
+hello_jobstep: obj/hello_jobstep.o obj/hello_openmp.o obj/${GPU_OBJ} obj/hello_pthreads.o
+	${CXX} ${LDFLAGS} obj/hello_jobstep.o obj/${GPU_OBJ} obj/hello_openmp.o obj/hello_pthreads.o -o hello_jobstep ${LIBRARIES}
 
-hello_hip.o: hello_hip.cpp
-	${CXX} ${CFLAGS} ${INCLUDES} -c hello_hip.cpp
+obj/hello_jobstep.o: src/hello_jobstep.cpp
+	${CXX} ${CFLAGS} ${INCLUDES} -c src/hello_jobstep.cpp -o obj/hello_jobstep.o
 
-hello_openmp.o: hello_openmp.cpp
-	${CXX} ${CFLAGS} ${INCLUDES} -c hello_openmp.cpp
+obj/hello_nogpu.o: src/hello_nogpu.cpp
+	${CXX} ${CFLAGS} ${INCLUDES} -c src/hello_nogpu.cpp -o obj/hello_nogpu.o
 
-hello_pthreads.o: hello_pthreads.cpp
-	${CXX} ${CFLAGS} ${INCLUDES} -c hello_pthreads.cpp
+obj/hello_hip.o: src/hello_hip.cpp
+	${CXX} ${CFLAGS} ${INCLUDES} -c src/hello_hip.cpp -o obj/hello_hip.o
+
+obj/hello_openmp.o: src/hello_openmp.cpp
+	${CXX} ${CFLAGS} ${INCLUDES} -c src/hello_openmp.cpp -o obj/hello_openmp.o
+
+obj/hello_pthreads.o: src/hello_pthreads.cpp
+	${CXX} ${CFLAGS} ${INCLUDES} -c src/hello_pthreads.cpp -o obj/hello_pthreads.o
 
 .PHONY: clean
 
 clean:
-	rm -f hello_jobstep *.o
+	rm -f hello_jobstep obj/*.o
 
 test:
 	./test.sh
