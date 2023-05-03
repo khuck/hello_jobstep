@@ -1,18 +1,26 @@
 Things to check:
     - Get assigned hardware
-        - process binding
-        - gpu binding
-            - is it optimal? without "closest" it may not be. can we get that from lstopo?
-        - openmp thread binding
-    - Get thread counts
-        - other threads
+        - process binding (done)
+        - gpu binding (done)
+        - openmp thread binding (done)
+    - Get thread counts (done)
+        - other threads (done)
     - Get utilization
-        - per bound set of resources
-    - Get contention (nonvoluntary_ctx_switch)
+        - get per-hwt utilization
+        - per bound set of resources - organize into sets
+    - Get contention
+        - nonvoluntary_ctx_switch
+        - cpustat values:
+            cpu_stat->name, &cpu_stat->user, &cpu_stat->nice,
+            &cpu_stat->system, &cpu_stat->idle,
+            &cpu_stat->iowait, &cpu_stat->irq, &cpu_stat->softirq,
+            &cpu_stat->steal, &cpu_stat->guest
         - for whole process
-        - can get per thread?
+        - can get per thread - yes in /proc/self/task/tid/status
     - Memory usage
         - % of total
+    - gpu binding
+        - is it optimal? without "closest" it may not be. can we get that from lstopo?
 
     - check this all over time
 
